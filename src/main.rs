@@ -2,14 +2,11 @@ use std::{path::PathBuf, str::FromStr};
 
 use clap::{AppSettings, Parser, Subcommand};
 use errors::TackleError;
-use log::{error, info, LevelFilter};
+use log::{debug, error, info, LevelFilter};
 use manifest::read_manifest;
 
 use crate::{
-    manifest::{
-        create_tackle_directory, tackle_directory_exists, write_manifest, TackleManifest,
-        TackleManifestHook, TackleManifestHooks,
-    },
+    manifest::{create_tackle_directory, tackle_directory_exists, TackleManifestHook},
     packages::fetch_package,
 };
 
@@ -24,7 +21,7 @@ struct Args {
     #[clap(subcommand)]
     command: Commands,
     /// Enable extra debug logging.
-    #[clap(long, short)]
+    #[clap(long, short, global = true)]
     debug: bool,
 }
 
@@ -48,8 +45,6 @@ enum Commands {
     /// Install a git hook from the target repository.
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     Install {
-        /// The type of hook to install.
-        hook: Hook,
         /// The URL of the hook to install.
         url: String,
     },
@@ -70,7 +65,9 @@ enum Commands {
     Initialize,
 }
 
+/// Fetch the project root.
 fn get_project_root() -> Result<PathBuf, TackleError> {
+    debug!("Discovering project root...");
     let cwd = std::env::current_dir().unwrap();
     let repo =
         git2::Repository::discover(&cwd).map_err(|_err| TackleError::RepositoryDiscoveryFailed)?;
@@ -78,7 +75,19 @@ fn get_project_root() -> Result<PathBuf, TackleError> {
     if let None = repo.workdir() {
         return Err(TackleError::RepositoryDiscoveryFailed);
     }
-    Ok(repo.workdir().unwrap().to_owned())
+    let project_root = repo.workdir().unwrap().to_owned();
+    debug!("Project root discovered: {}", project_root.display());
+    Ok(project_root)
+}
+
+/// Test if the project is initialized.
+fn is_initialized() -> bool {
+    debug!("Checking initialization state of project...");
+    let project_root = get_project_root();
+    if let Err(_) = project_root {
+        return false;
+    }
+    return tackle_directory_exists(&project_root.unwrap());
 }
 
 /// Initialize a new project.
@@ -102,50 +111,77 @@ fn initialize() -> Result<(), TackleError> {
 }
 
 /// Install a git hook from the target repository.
-fn install(hook: Hook, url: String) -> Result<(), TackleError> {
+fn install(url: String) -> Result<(), TackleError> {
+    if !is_initialized() {
+        return Err(TackleError::NotInitialized);
+    }
     let workdir = get_project_root()?;
     let manifest = read_manifest(&workdir)?;
-    // extract hook array reference
-    let hooks = match hook {
-        Hook::PreCommit => &manifest.hooks.precommit,
-    };
-    // check to see if the hook is already installed
-    if let Some(hooks) = hooks {
-        let exists = hooks.iter().find(|hook| hook.url == url).is_some();
-        if exists {
-            return Err(TackleError::AlreadyInitialized);
-        }
-    }
+    // install package
     info!("Installing '{}'...", url);
     let package = fetch_package(&url)?;
-
     // create the manifest hook entry
     let manifest_hook = TackleManifestHook {
         url: url.clone(),
         integrity: "".to_owned(),
         version: "1".to_owned(),
     };
-    // create the new manifest file
-    let append_hook = |mut hooks: Vec<TackleManifestHook>| {
-        hooks.push(manifest_hook.clone());
-        hooks
+    // // create the new manifest file
+    // let append_hook = |mut hooks: Vec<TackleManifestHook>| {
+    //     hooks.push(manifest_hook.clone());
+    //     hooks
+    // };
+    // let new_manifest = match hook {
+    //     Hook::PreCommit => TackleManifest {
+    //         hooks: TackleManifestHooks {
+    //             precommit: Some(
+    //                 manifest
+    //                     .hooks
+    //                     .precommit
+    //                     .map_or(vec![manifest_hook.clone()], append_hook),
+    //             ),
+    //             ..manifest.hooks
+    //         },
+    //         ..manifest
+    //     },
+    // };
+    // // write the new manifest
+    // write_manifest(&workdir, &new_manifest)?;
+
+    Ok(())
+}
+
+fn list() -> Result<(), TackleError> {
+    if !is_initialized() {
+        return Err(TackleError::NotInitialized);
+    }
+
+    let workdir = get_project_root()?;
+    let manifest = read_manifest(&workdir)?;
+
+    let precommit_hooks = match manifest.hooks.precommit {
+        Some(hooks) => hooks,
+        None => vec![],
     };
-    let new_manifest = match hook {
-        Hook::PreCommit => TackleManifest {
-            hooks: TackleManifestHooks {
-                precommit: Some(
-                    manifest
-                        .hooks
-                        .precommit
-                        .map_or(vec![manifest_hook.clone()], append_hook),
-                ),
-                ..manifest.hooks
-            },
-            ..manifest
-        },
+    let postcommit_hooks = match manifest.hooks.postcommit {
+        Some(hooks) => hooks,
+        None => vec![],
     };
-    // write the new manifest
-    write_manifest(&workdir, &new_manifest)?;
+
+    println!("Pre-commit Hooks:");
+    for hook in &precommit_hooks {
+        println!("\t{}", hook.url);
+    }
+    if precommit_hooks.is_empty() {
+        println!("\tNo hooks installed.");
+    }
+    println!("Post-commit Hooks:");
+    for hook in &postcommit_hooks {
+        println!("\t{}", hook.url);
+    }
+    if postcommit_hooks.is_empty() {
+        println!("\tNo hooks installed.");
+    }
 
     Ok(())
 }
@@ -166,10 +202,11 @@ fn main() {
     use Commands::*;
     let res = match args.command {
         Initialize => initialize(),
-        Install { hook, url } => install(hook, url),
+        Install { url } => install(url),
+        List => list(),
         _ => todo!(),
     };
-
+    // run the error handler on error
     if let Err(e) = res {
         error!("{}", e);
     }

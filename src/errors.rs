@@ -1,3 +1,4 @@
+use log::error;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -14,6 +15,8 @@ pub enum TackleError {
     CreateTackleDirectoryFailed(#[from] std::io::Error),
     #[error("Cannot initialize an existing project")]
     AlreadyInitialized,
+    #[error("Cannot perform operation on a non-initialized project")]
+    NotInitialized,
     #[error("Invalid commit hook")]
     InvalidCommitHook,
     #[error("Repository clone failed")]

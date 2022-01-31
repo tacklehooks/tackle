@@ -1,5 +1,6 @@
 use std::{fs, path::Path};
 
+use log::debug;
 use serde::{Deserialize, Serialize};
 
 use crate::errors::TackleError;
@@ -37,8 +38,12 @@ pub fn tackle_directory_exists<P: AsRef<Path>>(workdir: P) -> bool {
 
 /// Read the manifest file.
 pub fn read_manifest<P: AsRef<Path>>(workdir: P) -> Result<TackleManifest, TackleError> {
+    debug!(
+        "Reading manifest file at '{}/.tackle/tackle.toml'",
+        workdir.as_ref().display()
+    );
     let path = workdir.as_ref().join(".tackle/tackle.toml");
-    let contents = fs::read_to_string(&path)?;
+    let contents = fs::read_to_string(&path).map_err(|_| TackleError::ManifestReadFailed)?;
     let manifest: TackleManifest =
         toml::from_str(&contents).map_err(|err| TackleError::ManifestParseFailed(err))?;
     Ok(manifest)
