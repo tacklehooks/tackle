@@ -1,0 +1,15 @@
+version = "1"
+[[hooks.precommit]]
+url = "@tackle/hooks/eslint"
+version = "1"
+integrity = ""
+
+[[hooks.precommit]]
+url = "@tackle/hooks/eslin"
+version = "1"
+integrity = ""
+
+[[hooks.precommit]]
+url = "tackle/hooks/eslint"
+version = "1"
+integrity = ""
