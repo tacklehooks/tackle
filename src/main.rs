@@ -6,14 +6,16 @@ use log::{debug, error, info, LevelFilter};
 use manifest::read_manifest;
 
 use crate::{
+    config::TackleManifestHook,
     manifest::{create_tackle_directory, tackle_directory_exists},
-    packages::fetch_package, config::TackleManifestHook,
+    packages::fetch_package,
 };
 
+mod config;
 mod errors;
+mod hooks;
 mod manifest;
 mod packages;
-mod config;
 
 /// Multi-platform, agnostic git hook manager.
 #[derive(Parser)]
@@ -159,8 +161,6 @@ fn list() -> Result<(), TackleError> {
 
     let workdir = get_project_root()?;
     let manifest = read_manifest(&workdir)?;
-
-
 
     println!("Pre-commit Hooks:");
     for hook in &manifest.hooks.precommit {

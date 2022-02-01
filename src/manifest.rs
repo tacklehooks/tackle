@@ -3,8 +3,10 @@ use std::{fs, path::Path};
 use log::debug;
 use serde::{Deserialize, Serialize};
 
-use crate::{errors::TackleError, config::{TackleManifest, DEFAULT_MANIFEST, DEFAULT_GITIGNORE}};
-
+use crate::{
+    config::{TackleManifest, DEFAULT_GITIGNORE, DEFAULT_MANIFEST},
+    errors::TackleError,
+};
 
 /// Test if the tackle directory exists.
 pub fn tackle_directory_exists<P: AsRef<Path>>(workdir: P) -> bool {
@@ -57,4 +59,3 @@ pub fn create_tackle_directory<P: AsRef<Path>>(workdir: P) -> Result<(), TackleE
 
     Ok(())
 }
-
