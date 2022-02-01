@@ -15,6 +15,7 @@ mod config;
 mod errors;
 mod hooks;
 mod manifest;
+mod os;
 mod packages;
 
 /// Multi-platform, agnostic git hook manager.

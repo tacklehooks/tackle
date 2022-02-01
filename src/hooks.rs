@@ -1,15 +1,15 @@
-use crate::config::HookDefinition;
+use crate::{config::HookDefinition, os::is_program_in_path};
 
 /// An enum of possible hook states.
 #[derive(PartialEq)]
 pub enum HookState {
-	/// The hook was successful.
+    /// The hook was successful.
     Successful,
-	/// The hook exited with a non-zero error code.
+    /// The hook exited with a non-zero error code.
     Failed,
-	/// The hook was skipped as its conditions were not met.
+    /// The hook was skipped as its conditions were not met.
     Skipped,
-	/// The hook is waiting to be run.
+    /// The hook is waiting to be run.
     Pending,
 }
 
@@ -27,7 +27,7 @@ pub struct HookRunner {
 }
 
 impl HookRunner {
-	/// Creates a new hook runner.
+    /// Creates a new hook runner.
     pub fn from_hooks(hooks: Vec<HookDefinition>) -> HookRunner {
         HookRunner {
             hooks: hooks
@@ -56,6 +56,18 @@ impl HookRunner {
         // ensure that the hook is pending
         if hook.state != HookState::Pending {
             return false;
+        }
+
+        // ensure that hook has os dependencies
+        if !hook.hook.dependencies.is_empty() {
+            if !hook
+                .hook
+                .dependencies
+                .iter()
+                .all(|dep| is_program_in_path(dep))
+            {
+                return false;
+            }
         }
 
         let repository = git2::Repository::discover(std::env::current_dir().unwrap()).unwrap();
@@ -91,7 +103,7 @@ impl HookRunner {
         })
     }
 
-	/// Get the next hook to run, respecting the hook order and conditions.
+    /// Get the next hook to run, respecting the hook order and conditions.
     pub fn next_hook(&mut self) -> Option<&HookDefinition> {
         self.hooks
             .iter()
