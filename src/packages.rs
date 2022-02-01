@@ -6,21 +6,15 @@ use log::debug;
 use regex::Regex;
 use serde::Deserialize;
 
-use crate::{errors::TackleError, get_project_root, manifest::TackleManifestHooks};
+use crate::{errors::TackleError, get_project_root, config::TackleManifestHooks, config::Package};
 
 lazy_static! {
     static ref URL_REGEX: Regex =
         Regex::new(r"^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}").unwrap();
 }
 
-#[derive(Deserialize)]
-pub struct Package {
-    pub name: String,
-    pub version: String,
-    pub url: String,
-    pub integrity: String,
-    pub hooks: TackleManifestHooks,
-}
+
+
 
 /// Attempt to clone the repository at the given URL into the hook directory.
 pub fn fetch_package<S: AsRef<str>>(package: S) -> Result<Package, TackleError> {

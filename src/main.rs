@@ -6,13 +6,14 @@ use log::{debug, error, info, LevelFilter};
 use manifest::read_manifest;
 
 use crate::{
-    manifest::{create_tackle_directory, tackle_directory_exists, TackleManifestHook},
-    packages::fetch_package,
+    manifest::{create_tackle_directory, tackle_directory_exists},
+    packages::fetch_package, config::TackleManifestHook,
 };
 
 mod errors;
 mod manifest;
 mod packages;
+mod config;
 
 /// Multi-platform, agnostic git hook manager.
 #[derive(Parser)]
@@ -159,27 +160,20 @@ fn list() -> Result<(), TackleError> {
     let workdir = get_project_root()?;
     let manifest = read_manifest(&workdir)?;
 
-    let precommit_hooks = match manifest.hooks.precommit {
-        Some(hooks) => hooks,
-        None => vec![],
-    };
-    let postcommit_hooks = match manifest.hooks.postcommit {
-        Some(hooks) => hooks,
-        None => vec![],
-    };
+
 
     println!("Pre-commit Hooks:");
-    for hook in &precommit_hooks {
+    for hook in &manifest.hooks.precommit {
         println!("\t{}", hook.url);
     }
-    if precommit_hooks.is_empty() {
+    if manifest.hooks.precommit.is_empty() {
         println!("\tNo hooks installed.");
     }
     println!("Post-commit Hooks:");
-    for hook in &postcommit_hooks {
+    for hook in &manifest.hooks.postcommit {
         println!("\t{}", hook.url);
     }
-    if postcommit_hooks.is_empty() {
+    if manifest.hooks.precommit.is_empty() {
         println!("\tNo hooks installed.");
     }
 

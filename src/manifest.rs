@@ -3,32 +3,8 @@ use std::{fs, path::Path};
 use log::debug;
 use serde::{Deserialize, Serialize};
 
-use crate::errors::TackleError;
+use crate::{errors::TackleError, config::{TackleManifest, DEFAULT_MANIFEST, DEFAULT_GITIGNORE}};
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct TackleManifestHook {
-    pub url: String,
-    pub version: String,
-    pub integrity: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-
-pub struct TackleManifestHooks {
-    pub precommit: Option<Vec<TackleManifestHook>>,
-    pub postcommit: Option<Vec<TackleManifestHook>>,
-    pub prepush: Option<Vec<TackleManifestHook>>,
-    pub postpush: Option<Vec<TackleManifestHook>>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct TackleManifest {
-    pub version: String,
-    pub hooks: TackleManifestHooks,
-}
-
-static DEFAULT_MANIFEST: &'static str = include_str!("assets/tackle.toml");
-static DEFAULT_GITIGNORE: &'static str = include_str!("assets/.gitignore");
 
 /// Test if the tackle directory exists.
 pub fn tackle_directory_exists<P: AsRef<Path>>(workdir: P) -> bool {
@@ -82,15 +58,3 @@ pub fn create_tackle_directory<P: AsRef<Path>>(workdir: P) -> Result<(), TackleE
     Ok(())
 }
 
-#[cfg(test)]
-mod tests {
-    use super::{TackleManifest, DEFAULT_MANIFEST};
-
-    #[test]
-    fn test_default_config_file() {
-        let manifest: TackleManifest = toml::from_str(DEFAULT_MANIFEST).unwrap();
-        assert_eq!(manifest.version, "1");
-        let precommit = manifest.hooks.precommit.unwrap();
-        assert_eq!(precommit.len(), 1);
-    }
-}
