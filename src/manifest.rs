@@ -1,7 +1,6 @@
 use std::{fs, path::Path};
 
 use log::debug;
-use serde::{Deserialize, Serialize};
 
 use crate::{
     config::{TackleManifest, DEFAULT_GITIGNORE, DEFAULT_MANIFEST},

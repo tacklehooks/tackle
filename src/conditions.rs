@@ -1,3 +1,4 @@
+//! Handles hook conditions.
 use crate::{config::HookDefinition, os::is_program_in_path};
 
 /// An enum of possible hook states.

@@ -1,3 +1,5 @@
+//! Defines the configuration for the application.
+
 use serde::{Deserialize, Serialize};
 
 pub static DEFAULT_MANIFEST: &'static str = include_str!("assets/tackle.toml");
@@ -22,9 +24,12 @@ pub struct TackleManifestHooks {
     pub postpush: Vec<TackleManifestHook>,
 }
 
+/// The manifest file.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TackleManifest {
+	/// The manifest version.
     pub version: String,
+	/// A list of installed hooks.
     pub hooks: TackleManifestHooks,
 }
 

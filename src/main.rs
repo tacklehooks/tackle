@@ -11,9 +11,10 @@ use crate::{
     packages::fetch_package,
 };
 
+mod cache;
+mod conditions;
 mod config;
 mod errors;
-mod conditions;
 mod manifest;
 mod os;
 mod packages;

@@ -4,9 +4,8 @@ use git2::Repository;
 use lazy_static::lazy_static;
 use log::debug;
 use regex::Regex;
-use serde::Deserialize;
 
-use crate::{config::Package, config::TackleManifestHooks, errors::TackleError, get_project_root};
+use crate::{config::Package, errors::TackleError, get_project_root};
 
 lazy_static! {
     static ref URL_REGEX: Regex =
