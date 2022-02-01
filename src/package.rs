@@ -1,11 +1,72 @@
+//! Contains definitions for interacting with a Tackle package.
 use std::fs;
 
 use git2::Repository;
 use lazy_static::lazy_static;
 use log::debug;
 use regex::Regex;
+use serde::Deserialize;
 
-use crate::{config::Package, errors::TackleError, get_project_root};
+use crate::{errors::TackleError, project::get_project_root};
+
+/// A `tackle.toml` file defining a hook package.
+#[derive(Deserialize)]
+pub struct Package {
+    /// The name of the package.
+    pub name: Option<String>,
+    /// A description of the package.
+    pub description: Option<String>,
+    /// The version of the package.
+    pub version: Option<String>,
+    /// Hooks defined by this package.
+    pub hooks: HookDefinitions,
+}
+
+/// A collection of hooks defined by a package.
+#[derive(Deserialize)]
+pub struct HookDefinitions {
+    /// A list of hook definitions for the pre-commit hook.
+    #[serde(default = "Vec::new")]
+    pub precommit: Vec<HookDefinition>,
+    /// A list of hook definitions for the post-commit hook.
+    #[serde(default = "Vec::new")]
+    pub postcommit: Vec<HookDefinition>,
+}
+
+/// A hook definition inside a Tackle package.
+#[derive(Deserialize, PartialEq, Debug)]
+pub struct HookDefinition {
+    /// The ID of the hook. This field is used to identify the hook in
+    /// condition blocks of other hooks.
+    pub id: Option<String>,
+    /// The command to run.
+    pub command: Vec<String>,
+    /// OS-level dependencies for the hook.
+    #[serde(default = "Vec::new")]
+    pub dependencies: Vec<String>,
+    /// A vector of conditions to test before the hook is run.
+    #[serde(default = "Vec::new")]
+    pub conditions: Vec<HookCondition>,
+}
+
+#[derive(Deserialize, PartialEq, Debug)]
+pub struct HookCondition {
+    /// Matches successful tasks.
+    #[serde(default = "Vec::new")]
+    pub successful: Vec<String>,
+    /// Matches failed tasks.
+    #[serde(default = "Vec::new")]
+    pub failed: Vec<String>,
+    /// Matches skipped tasks.
+    #[serde(default = "Vec::new")]
+    pub skipped: Vec<String>,
+    /// Matches files.
+    #[serde(default = "Vec::new")]
+    pub exists: Vec<String>,
+    /// Matches the current branch.
+    #[serde(default = "Vec::new")]
+    pub branch: Vec<String>,
+}
 
 lazy_static! {
     static ref URL_REGEX: Regex =

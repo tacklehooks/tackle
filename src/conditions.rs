@@ -1,5 +1,5 @@
 //! Handles hook conditions.
-use crate::{config::HookDefinition, os::is_program_in_path};
+use crate::{util::is_program_in_path, package::HookDefinition};
 
 /// An enum of possible hook states.
 #[derive(PartialEq)]
@@ -117,8 +117,8 @@ impl HookRunner {
 #[cfg(test)]
 mod tests {
     use crate::{
-        config::{HookCondition, HookDefinition},
         conditions::HookState,
+        package::{HookCondition, HookDefinition},
     };
 
     use super::HookRunner;

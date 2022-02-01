@@ -1,3 +1,4 @@
+//! Contains various utilites and useful methods.
 use std::{env, fs};
 
 /// Test if the target executable exists in path.
@@ -16,7 +17,7 @@ pub fn is_program_in_path(program: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use crate::os::is_program_in_path;
+    use crate::util::is_program_in_path;
 
     #[test]
     fn test_is_program_in_path() {
