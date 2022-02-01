@@ -117,7 +117,7 @@ impl HookRunner {
 mod tests {
     use crate::{
         config::{HookCondition, HookDefinition},
-        hooks::HookState,
+        conditions::HookState,
     };
 
     use super::HookRunner;

@@ -13,7 +13,7 @@ use crate::{
 
 mod config;
 mod errors;
-mod hooks;
+mod conditions;
 mod manifest;
 mod os;
 mod packages;
