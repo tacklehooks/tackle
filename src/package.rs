@@ -1,5 +1,5 @@
 //! Contains definitions for interacting with a Tackle package.
-use std::fs;
+use std::{fs, path::Path};
 
 use git2::Repository;
 use lazy_static::lazy_static;
@@ -7,7 +7,7 @@ use log::debug;
 use regex::Regex;
 use serde::Deserialize;
 
-use crate::{errors::TackleError, project::get_project_root};
+use crate::{errors::TackleError, project::get_project_root, util::package_into_git_url};
 
 /// A `tackle.toml` file defining a hook package.
 #[derive(Deserialize)]
@@ -20,6 +20,14 @@ pub struct Package {
     pub version: Option<String>,
     /// Hooks defined by this package.
     pub hooks: HookDefinitions,
+}
+
+impl Package {
+    pub fn from_path<P: AsRef<Path>>(path: P) -> Result<Package, TackleError> {
+        let contents = fs::read_to_string(path)?;
+        let package: Package = toml::from_str(&contents)?;
+        Ok(package)
+    }
 }
 
 /// A collection of hooks defined by a package.
@@ -68,29 +76,9 @@ pub struct HookCondition {
     pub branch: Vec<String>,
 }
 
-lazy_static! {
-    static ref URL_REGEX: Regex =
-        Regex::new(r"^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}").unwrap();
-}
-
 /// Attempt to clone the repository at the given URL into the hook directory.
 pub fn fetch_package<S: AsRef<str>>(package: S) -> Result<Package, TackleError> {
-    let package = package.as_ref();
-    // package must have at least one slash
-    debug!("Validating package URL...");
-    if !package.contains('/') {
-        panic!("invalid package name");
-    }
-    debug!("Fetching package '{}'...", package);
-    // if package does not contain a tld, then assume it is a github repo
-    let tld = package.split('/').next().unwrap();
-    let repo_url = match URL_REGEX.is_match(tld) {
-        true => package.to_owned(),
-        false => format!("github.com/{}", package),
-    };
-
-    let repo_url = repo_url.split("/").take(3).collect::<Vec<_>>().join("/");
-
+    let repo_url = package_into_git_url(package)?;
     debug!("Repository URL: {}", repo_url);
     let path = get_project_root()?.join(".tackle/hooks").join(&repo_url);
     // if the work directory exists, PANIC!!
@@ -123,16 +111,5 @@ pub fn fetch_package<S: AsRef<str>>(package: S) -> Result<Package, TackleError> 
     match toml::from_str::<Package>(&manifest) {
         Ok(manifest) => Ok(manifest),
         Err(err) => panic!("manifest parse error: {}", err),
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_url_regex() {
-        let url = "github.com/rust-lang/rust";
-        assert!(super::URL_REGEX.is_match(url));
-        let url = "rust-lang/rust";
-        assert!(!super::URL_REGEX.is_match(url));
     }
 }

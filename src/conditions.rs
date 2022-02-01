@@ -1,5 +1,5 @@
 //! Handles hook conditions.
-use crate::{util::is_program_in_path, package::HookDefinition};
+use crate::{package::HookDefinition, util::is_program_in_path};
 
 /// An enum of possible hook states.
 #[derive(PartialEq)]

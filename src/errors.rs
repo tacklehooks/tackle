@@ -1,5 +1,4 @@
 //! Defines the application error type and error handling methods.
-//! 
 use log::error;
 use thiserror::Error;
 

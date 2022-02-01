@@ -1,7 +1,8 @@
 //! Contains types and methods for interacting with a project where Tackle is installed.
 use std::{
     fs,
-    path::{Path, PathBuf}, sync::Mutex,
+    path::{Path, PathBuf},
+    sync::Mutex,
 };
 
 use lazy_static::lazy_static;
@@ -16,8 +17,8 @@ pub static DEFAULT_MANIFEST: &'static str = include_str!("assets/tackle.toml");
 pub static DEFAULT_GITIGNORE: &'static str = include_str!("assets/.gitignore");
 
 lazy_static! {
-	/// The path to the project root. This is cached to avoid repeated calls to `get_project_root`.
-	pub static ref TACKLE_DIR: Mutex<Option<String>> = Mutex::new(None);
+    /// The path to the project root. This is cached to avoid repeated calls to `get_project_root`.
+    pub static ref TACKLE_DIR: Mutex<Option<String>> = Mutex::new(None);
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
