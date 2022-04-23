@@ -45,16 +45,19 @@ impl FromStr for Hook {
 enum Commands {
     /// Install a git hook from the target repository.
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    Install {
-        /// The URL of the hook to install.
+    #[clap(alias = "install", alias = "i")]
+    Add {
+        /// The URL of the hook to add.
         url: String,
     },
-    /// Uninstall a git hook from the target repository.
+    /// Remove a git hook from the target repository.
     /// This will remove the hook from the repository and remove the hook file from the hooks directory.
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-    Uninstall { package: String },
+	#[clap(alias = "rm", alias = "uninstall", alias = "ui")]
+    Remove { package: String },
     /// List all installed hooks.
-    List,
+	#[clap(alias = "ls", alias = "l")]
+	List,
     /// Query the hook repository for a list of available hooks.
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     Query {
@@ -82,7 +85,7 @@ pub fn run_cli() {
     use Commands::*;
     let res = match args.command {
         Initialize => initialize(),
-        Install { url } => install(url),
+        Add { url } => install(url),
         List => list(),
         _ => todo!(),
     };
