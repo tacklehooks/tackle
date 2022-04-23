@@ -1,5 +1,7 @@
-//! Handles hook conditions.
+//! Contains the logic for the execution of hook pipelines.
+
 use crate::{package::HookDefinition, util::is_program_in_path};
+pub mod condition;
 
 /// An enum of possible hook states.
 #[derive(PartialEq)]
@@ -117,7 +119,7 @@ impl HookRunner {
 #[cfg(test)]
 mod tests {
     use crate::{
-        conditions::HookState,
+        hooks::HookState,
         package::{HookCondition, HookDefinition},
     };
 

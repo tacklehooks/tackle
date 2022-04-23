@@ -1,10 +1,13 @@
 //! Contains definitions for interacting with a Tackle package.
+pub mod cache;
+pub mod download;
+pub mod link;
+pub mod resolve;
+
 use std::{fs, path::Path};
 
 use git2::Repository;
-use lazy_static::lazy_static;
 use log::debug;
-use regex::Regex;
 use serde::Deserialize;
 
 use crate::{errors::TackleError, project::get_project_root, util::package_into_git_url};
