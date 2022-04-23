@@ -53,11 +53,11 @@ enum Commands {
     /// Remove a git hook from the target repository.
     /// This will remove the hook from the repository and remove the hook file from the hooks directory.
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
-	#[clap(alias = "rm", alias = "uninstall", alias = "ui")]
+    #[clap(alias = "rm", alias = "uninstall", alias = "ui")]
     Remove { package: String },
     /// List all installed hooks.
-	#[clap(alias = "ls", alias = "l")]
-	List,
+    #[clap(alias = "ls", alias = "l")]
+    List,
     /// Query the hook repository for a list of available hooks.
     #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     Query {

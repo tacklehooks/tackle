@@ -1,4 +1,15 @@
-//! Contains definitions for interacting with a Tackle package.
+//! This module definitions for interacting with a Tackle package, as well as the logic
+//! for installing packages.
+//!
+//! Package installation happens in 3 steps:
+//! - Resolution
+//! - Download
+//! - Link
+//!
+//! The resolution step is responsible for resolving the packagee name to either a download URL, or a cached
+//! package.
+//! The download step is responsible for downloading the package from the URL, and caching it.
+//! The linking step is responsible for linking the pacakge from the cache to the project.
 pub mod cache;
 pub mod download;
 pub mod link;
