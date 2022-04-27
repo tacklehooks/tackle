@@ -6,6 +6,7 @@ use crate::{
 };
 
 /// Initialize a new project.
+#[tracing::instrument]
 pub fn initialize() -> Result<(), TackleError> {
     let cwd = std::env::current_dir().unwrap();
     let repo =

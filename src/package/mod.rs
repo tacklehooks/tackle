@@ -4,7 +4,7 @@ pub mod download;
 pub mod link;
 pub mod resolve;
 
-use std::{fs, path::Path};
+use std::{fmt::Debug, fs, path::Path};
 
 use git2::Repository;
 use log::debug;
@@ -80,7 +80,7 @@ pub struct HookCondition {
 }
 
 /// Attempt to clone the repository at the given URL into the hook directory.
-pub fn fetch_package<S: AsRef<str>>(package: S) -> Result<Package, TackleError> {
+pub fn fetch_package<S: AsRef<str> + Debug>(package: S) -> Result<Package, TackleError> {
     let repo_url = package_into_git_url(package)?;
     debug!("Repository URL: {}", repo_url);
     let path = get_project_root()?.join(".tackle/hooks").join(&repo_url);

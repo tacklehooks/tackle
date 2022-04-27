@@ -7,6 +7,7 @@ use crate::{
 };
 
 /// Install a git hook from the target repository.
+#[tracing::instrument]
 pub fn install(url: String) -> Result<(), TackleError> {
     if !is_initialized() {
         return Err(TackleError::NotInitialized);

@@ -1,5 +1,6 @@
 //! Contains types and methods for interacting with a project where Tackle is installed.
 use std::{
+    fmt::Debug,
     fs,
     path::{Path, PathBuf},
     sync::Mutex,
@@ -50,7 +51,8 @@ pub struct TackleManifest {
 }
 
 /// Read the manifest file.
-pub fn read_manifest<P: AsRef<Path>>(workdir: P) -> Result<TackleManifest, TackleError> {
+#[tracing::instrument]
+pub fn read_manifest<P: AsRef<Path> + Debug>(workdir: P) -> Result<TackleManifest, TackleError> {
     debug!(
         "Reading manifest file at '{}/.tackle/tackle.toml'",
         workdir.as_ref().display()
@@ -73,7 +75,8 @@ pub fn write_manifest<P: AsRef<Path>>(
 }
 
 /// Create the tackle directory if it does not exist.
-pub fn create_tackle_directory<P: AsRef<Path>>(workdir: P) -> Result<(), TackleError> {
+#[tracing::instrument]
+pub fn create_tackle_directory<P: AsRef<Path> + Debug>(workdir: P) -> Result<(), TackleError> {
     let path = workdir.as_ref().join(".tackle");
     if !path.exists() {
         fs::create_dir_all(&path).map_err(|err| TackleError::CreateTackleDirectoryFailed(err))?;
@@ -96,6 +99,7 @@ pub fn create_tackle_directory<P: AsRef<Path>>(workdir: P) -> Result<(), TackleE
 }
 
 /// Fetch the project root.
+#[tracing::instrument]
 pub fn get_project_root() -> Result<PathBuf, TackleError> {
     debug!("Discovering project root...");
     let cwd = std::env::current_dir().unwrap();
@@ -111,6 +115,7 @@ pub fn get_project_root() -> Result<PathBuf, TackleError> {
 }
 
 /// Test if the project is initialized.
+#[tracing::instrument]
 pub fn is_initialized() -> bool {
     debug!("Checking initialization state of project...");
     let project_root = get_project_root();
@@ -121,7 +126,8 @@ pub fn is_initialized() -> bool {
 }
 
 /// Test if the tackle directory exists.
-pub fn check_tackle_directory_exists<P: AsRef<Path>>(workdir: P) -> bool {
+#[tracing::instrument]
+pub fn check_tackle_directory_exists<P: AsRef<Path> + Debug>(workdir: P) -> bool {
     let path = workdir.as_ref().join(".tackle");
     path.exists() && path.is_dir()
 }

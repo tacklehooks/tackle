@@ -1,6 +1,6 @@
 //! Handles caching of hook packages.
 
-use std::{fs, path::PathBuf, sync::Mutex};
+use std::{fmt::Debug, fs, path::PathBuf, sync::Mutex};
 
 use lazy_static::lazy_static;
 use log::debug;
@@ -18,6 +18,7 @@ lazy_static! {
 
 /// Resolve the location of the tackle cache directory.
 /// If the directory does not exist, it will be created.
+#[tracing::instrument]
 pub fn resolve_cache_directory() -> Result<PathBuf, TackleError> {
     // check if the cache directory was already resolved
     if let Some(cache_dir) = CACHE_DIR.lock().unwrap().as_ref() {
@@ -36,7 +37,8 @@ pub fn resolve_cache_directory() -> Result<PathBuf, TackleError> {
 }
 
 /// Lookup the location of the repository for a particular package.
-pub fn lookup_repository<S: AsRef<str>>(url: S) -> Result<Option<PathBuf>, TackleError> {
+#[tracing::instrument]
+pub fn lookup_repository<S: AsRef<str> + Debug>(url: S) -> Result<Option<PathBuf>, TackleError> {
     let cache_dir = resolve_cache_directory()?;
     let mut path = cache_dir;
     path.push(url.as_ref());
@@ -52,7 +54,8 @@ pub fn lookup_repository<S: AsRef<str>>(url: S) -> Result<Option<PathBuf>, Tackl
     }
 }
 
-pub fn lookup_package<S: AsRef<str>>(url: S) -> Result<Option<Package>, TackleError> {
+#[tracing::instrument]
+pub fn lookup_package<S: AsRef<str> + Debug>(url: S) -> Result<Option<Package>, TackleError> {
     // lookup the repository the package is in
     let package_dir = lookup_repository(&url)?;
     if let None = package_dir {

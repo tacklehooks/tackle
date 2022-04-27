@@ -3,6 +3,7 @@ use crate::{
     project::{get_project_root, is_initialized, read_manifest},
 };
 
+#[tracing::instrument]
 pub fn list() -> Result<(), TackleError> {
     if !is_initialized() {
         return Err(TackleError::NotInitialized);

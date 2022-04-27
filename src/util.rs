@@ -1,5 +1,5 @@
 //! Contains various utilites and useful methods.
-use std::{env, fs};
+use std::{env, fmt::Debug, fs};
 
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -7,6 +7,7 @@ use regex::Regex;
 use crate::errors::TackleError;
 
 /// Test if the target executable exists in path.
+#[tracing::instrument]
 pub fn is_program_in_path(program: &str) -> bool {
     let delimiter = if cfg!(windows) { ";" } else { ":" };
     if let Ok(path) = env::var("PATH") {
@@ -26,14 +27,16 @@ lazy_static! {
 }
 
 /// Translate a package name into a valid Git repository URL.
-pub fn package_into_git_url<S: AsRef<str>>(url: S) -> Result<String, TackleError> {
+#[tracing::instrument]
+pub fn package_into_git_url<S: AsRef<str> + Debug>(url: S) -> Result<String, TackleError> {
     let repo_url = resolve_package_url(url)?;
     let repo_url = repo_url.split("/").take(3).collect::<Vec<_>>().join("/");
     Ok(repo_url)
 }
 
 /// Resolve a package name into a valid path.
-pub fn resolve_package_url<S: AsRef<str>>(url: S) -> Result<String, TackleError> {
+#[tracing::instrument]
+pub fn resolve_package_url<S: AsRef<str> + Debug>(url: S) -> Result<String, TackleError> {
     let url = url.as_ref();
     // package must have at least one slash
     if !url.contains('/') {
@@ -49,7 +52,8 @@ pub fn resolve_package_url<S: AsRef<str>>(url: S) -> Result<String, TackleError>
 }
 
 /// Extracts the relative path from the repository root to a package's directory from its repository URL.
-pub fn extract_package_path<S: AsRef<str>>(url: S) -> Result<String, TackleError> {
+#[tracing::instrument]
+pub fn extract_package_path<S: AsRef<str> + Debug>(url: S) -> Result<String, TackleError> {
     let url = resolve_package_url(url)?;
     // skip the git server and repository names
     let last = url.split('/').skip(3).collect::<Vec<_>>().join("/");
