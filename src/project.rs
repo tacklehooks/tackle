@@ -64,6 +64,7 @@ pub fn read_manifest<P: AsRef<Path> + Debug>(workdir: P) -> Result<TackleManifes
     Ok(manifest)
 }
 
+#[tracing::instrument]
 pub fn write_manifest<P: AsRef<Path>>(
     workdir: P,
     manifest: &TackleManifest,

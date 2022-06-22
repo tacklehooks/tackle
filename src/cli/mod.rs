@@ -69,6 +69,7 @@ enum Commands {
     Initialize,
 }
 
+#[tracing::instrument]
 pub fn run_cli() {
     let args = Args::parse();
     // if debug mode is enabled, initialize a more verbose logger.
