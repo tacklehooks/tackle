@@ -25,14 +25,6 @@ lazy_static! {
         Regex::new(r"^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}").unwrap();
 }
 
-/// Translate a package name into a valid Git repository URL.
-pub fn package_into_git_url<S: AsRef<str>>(url: S) -> Result<String, TackleError> {
-    let repo_url = resolve_package_url(url)?;
-    let repo_url = repo_url.split("/").take(3).collect::<Vec<_>>().join("/");
-    Ok(repo_url)
-}
-
-/// Resolve a package name into a valid path.
 pub fn resolve_package_url<S: AsRef<str>>(url: S) -> Result<String, TackleError> {
     let url = url.as_ref();
     // package must have at least one slash
@@ -53,7 +45,7 @@ pub fn extract_package_path<S: AsRef<str>>(url: S) -> Result<String, TackleError
     let url = resolve_package_url(url)?;
     // skip the git server and repository names
     let last = url.split('/').skip(3).collect::<Vec<_>>().join("/");
-    if last == "" {
+    if last.is_empty() {
         Ok(".".to_owned())
     } else {
         Ok(last)

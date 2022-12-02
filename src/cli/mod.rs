@@ -6,7 +6,7 @@ mod list;
 
 use std::str::FromStr;
 
-use clap::{AppSettings, Parser, Subcommand};
+use clap::{Parser, Subcommand};
 
 pub use initialize::*;
 pub use install::*;
@@ -44,7 +44,6 @@ impl FromStr for Hook {
 #[derive(Subcommand)]
 enum Commands {
     /// Install a git hook from the target repository.
-    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     #[clap(alias = "install", alias = "i")]
     Add {
         /// The URL of the hook to add.
@@ -52,14 +51,12 @@ enum Commands {
     },
     /// Remove a git hook from the target repository.
     /// This will remove the hook from the repository and remove the hook file from the hooks directory.
-    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
 	#[clap(alias = "rm", alias = "uninstall", alias = "ui")]
     Remove { package: String },
     /// List all installed hooks.
 	#[clap(alias = "ls", alias = "l")]
 	List,
     /// Query the hook repository for a list of available hooks.
-    #[clap(setting(AppSettings::ArgRequiredElseHelp))]
     Query {
         /// The name of the package to query.
         package: String,

@@ -12,16 +12,16 @@ use serde::{Deserialize, Serialize};
 use crate::errors::TackleError;
 
 /// The default manifest file.
-pub static DEFAULT_MANIFEST: &'static str = include_str!("assets/tackle.toml");
+pub static DEFAULT_MANIFEST: &str = include_str!("assets/tackle.toml");
 /// The default gitignore file.
-pub static DEFAULT_GITIGNORE: &'static str = include_str!("assets/.gitignore");
+pub static DEFAULT_GITIGNORE: &str = include_str!("assets/.gitignore");
 
 lazy_static! {
     /// The path to the project root. This is cached to avoid repeated calls to `get_project_root`.
     pub static ref TACKLE_DIR: Mutex<Option<String>> = Mutex::new(None);
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct TackleManifestHook {
     pub url: String,
     pub version: String,
@@ -58,7 +58,7 @@ pub fn read_manifest<P: AsRef<Path>>(workdir: P) -> Result<TackleManifest, Tackl
     let path = workdir.as_ref().join(".tackle/tackle.toml");
     let contents = fs::read_to_string(&path).map_err(|_| TackleError::ManifestReadFailed)?;
     let manifest: TackleManifest =
-        toml::from_str(&contents).map_err(|err| TackleError::ManifestParseFailed(err))?;
+        toml::from_str(&contents).map_err(TackleError::ManifestParseFailed)?;
     Ok(manifest)
 }
 
@@ -76,13 +76,13 @@ pub fn write_manifest<P: AsRef<Path>>(
 pub fn create_tackle_directory<P: AsRef<Path>>(workdir: P) -> Result<(), TackleError> {
     let path = workdir.as_ref().join(".tackle");
     if !path.exists() {
-        fs::create_dir_all(&path).map_err(|err| TackleError::CreateTackleDirectoryFailed(err))?;
+        fs::create_dir_all(&path).map_err(TackleError::CreateTackleDirectoryFailed)?;
     }
     // create the empty hooks directory
     let hooks_dir = &path.join("hooks");
     if !hooks_dir.exists() {
-        fs::create_dir_all(&hooks_dir)
-            .map_err(|err| TackleError::CreateTackleDirectoryFailed(err))?;
+        fs::create_dir_all(hooks_dir)
+            .map_err(TackleError::CreateTackleDirectoryFailed)?;
     }
     // write the default manifest
     let manifest_path = &path.join("tackle.toml");
@@ -117,7 +117,7 @@ pub fn is_initialized() -> bool {
     if let Err(_) = project_root {
         return false;
     }
-    return check_tackle_directory_exists(&project_root.unwrap());
+    check_tackle_directory_exists(&project_root.unwrap())
 }
 
 /// Test if the tackle directory exists.

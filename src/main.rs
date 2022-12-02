@@ -6,6 +6,7 @@ mod hooks;
 mod package;
 mod project;
 mod util;
+mod graph;
 
 fn main() {
     run_cli();
