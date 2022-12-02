@@ -31,4 +31,3 @@ tackle init
 ```
 
 This will set up your project's `.tackle` directory and create the `tackle.toml` manifest file.
-SkyezerFox

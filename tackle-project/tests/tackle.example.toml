@@ -1,0 +1,11 @@
+version = "1"
+
+[imports]
+commitlint1 = "github.com/tacklehooks/commitlint@latest"
+commitlint2 = { url = "github.com/tacklehooks/commitlint", version = "1.2.1" }
+
+[imports.commitlint3]
+version = "1.2.1"
+url = "github.com/tacklehooks/commitlint"
+include = ["lint"]
+
